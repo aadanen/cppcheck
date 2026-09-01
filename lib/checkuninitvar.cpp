@@ -834,7 +834,7 @@ bool CheckUninitVarImpl::checkScopeForVariable(const Token *tok, const Variable&
                         }
                     }
                 }
-                if (Token::simpleMatch(parent->astParent(), "=") && astIsLHS(parent)) {
+                if (parent->astParent() && parent->astParent()->isAssignmentOp() && astIsLHS(parent)) {
                     const Token *eq = parent->astParent();
                     if (const Token *errorToken = checkExpr(eq->astOperand2(), var, *alloc, number_of_if==0)) {
                         if (!suppressErrors)
@@ -1295,7 +1295,17 @@ const Token* CheckUninitVarImpl::isVariableUsage(const Token *vartok, const Libr
             }
             if (alloc != NO_ALLOC && astIsRhs(valueExpr))
                 return nullptr;
+        } else if (tok->astParent() && tok->astParent()->isAssignmentOp()) {
+            // all variables in a compound assignment get read, so NO_ALLOC is
+            // never acceptable
+            if (alloc != NO_ALLOC) {
+                // if its not a pointer or array, or not dereferenced it is safe
+                if (!(pointer || alloc == ARRAY) || !derefValue) {
+                    return nullptr;
+                }
+            }
         }
+
     }
 
     // Initialize reference variable
