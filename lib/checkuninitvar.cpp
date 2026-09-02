@@ -1295,17 +1295,28 @@ const Token* CheckUninitVarImpl::isVariableUsage(const Token *vartok, const Libr
             }
             if (alloc != NO_ALLOC && astIsRhs(valueExpr))
                 return nullptr;
-        } else if (tok->astParent() && tok->astParent()->isAssignmentOp()) {
-            // all variables in a compound assignment get read, so NO_ALLOC is
-            // never acceptable
-            if (alloc != NO_ALLOC) {
-                // if its not a pointer or array, or not dereferenced it is safe
-                if (!(pointer || alloc == ARRAY) || !derefValue) {
-                    return nullptr;
-                }
+        } else if (tok->astParent() && (tok->astParent()->isAssignmentOp() || tok->astParent()->isIncDecOp())) {
+            // NO_ALLOC -> no matter what we read the uninitialized memory.
+            // pointer/array -> safe, as long as we don't dereference
+            //
+            // sometimes "pointer" and "alloc == ARRAY" are used for things
+            // that aren't actually pointers or arrays.
+            //
+            // this test
+            // ctu("void increment(int& i) { ++i; }\n" // #6475
+            // uses the callback which hardcodes pointer = true and alloc = ARRAY
+            // though int& isn't a pointer or an array, and we expect this
+            // function to not return nullptr even though i is not dereferenced
+            bool isPtr = pointer;
+            bool isArr = alloc == ARRAY;
+            if (vartok && vartok->variable()) {
+                isPtr = vartok->variable()->isPointer();
+                isArr = vartok->variable()->isArray();
+            }
+            if ((alloc != NO_ALLOC) && ((isPtr || isArr) && !derefValue)) {
+                return nullptr;
             }
         }
-
     }
 
     // Initialize reference variable
