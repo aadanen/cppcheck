@@ -1295,7 +1295,7 @@ const Token* CheckUninitVarImpl::isVariableUsage(const Token *vartok, const Libr
             }
             if (alloc != NO_ALLOC && astIsRhs(valueExpr))
                 return nullptr;
-        } else if (tok->astParent() && (tok->astParent()->isAssignmentOp() || tok->astParent()->isIncDecOp())) {
+        } else if (Token::Match(tok->astParent(), "%assign%|++|--")) {
             // NO_ALLOC -> no matter what we read the uninitialized memory.
             // pointer/array -> safe, as long as we don't dereference
             bool isPtr = pointer;
