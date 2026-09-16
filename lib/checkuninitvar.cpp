@@ -834,7 +834,7 @@ bool CheckUninitVarImpl::checkScopeForVariable(const Token *tok, const Variable&
                         }
                     }
                 }
-                if (parent->astParent() && parent->astParent()->isAssignmentOp() && astIsLHS(parent)) {
+                if (Token::Match(parent->astParent(), "%assign%") && astIsLHS(parent)) {
                     const Token *eq = parent->astParent();
                     if (const Token *errorToken = checkExpr(eq->astOperand2(), var, *alloc, number_of_if==0)) {
                         if (!suppressErrors)
