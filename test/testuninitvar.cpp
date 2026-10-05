@@ -2203,7 +2203,6 @@ private:
                        "}\n");
         ASSERT_EQUALS("", errout_str());
 
-
         checkUninitVar("void f() {\n"
                        "    char *p = new char;\n"
                        "    p += 1;\n"
@@ -2227,9 +2226,9 @@ private:
                        "}\n");
         ASSERT_EQUALS("", errout_str());
 
-        checkUninitVar("void g() {\n"
+        checkUninitVar("void g() {\n" // #15005
                        "    int* p = new int;\n"
-                       "    ++p; // FP\n"
+                       "    ++p;\n"
                        "    delete (p - 1);\n"
                        "}\n");
         ASSERT_EQUALS("", errout_str());
