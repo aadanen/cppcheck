@@ -2231,7 +2231,7 @@ private:
                        "    delete p;\n"
                        "}\n");
         ASSERT_EQUALS("[test.cpp:3:5]: (error) Memory is allocated but not initialized: p [uninitdata]\n", errout_str());
-        
+
         checkUninitVar("void f() {\n"
                        "    char *buf = (char *)malloc(1);\n"
                        "    if (!buf)\n"
